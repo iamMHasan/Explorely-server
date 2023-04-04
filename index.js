@@ -4,15 +4,18 @@ import cors from "cors"
 import morgan from "morgan"
 import dotenv from "dotenv"
 import userRouter from "./routes/user.js"
+import tourRouter from "./routes/tour.js"
 
 dotenv.config()
 const  port = process.env.PORT || 5000
 const app = express()
 
-app.use(morgan("dev"))
+// app.use(morgan("dev"))
 app.use(express.json())
+app.use(cors())
 
 app.use("/users", userRouter)
+app.use("/tours", tourRouter)
 
 
 mongoose.connect(process.env.DATABASE)
