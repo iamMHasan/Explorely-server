@@ -97,3 +97,29 @@ export const updateTour = async (req, res) => {
         })
     }
 }
+
+export const getTourBySearch = async(req, res)=>{
+    const {searchQuery} = req.query 
+    try {
+        const title = new RegExp(searchQuery, "i")
+        const tours = await TourModal.find({title})
+        res.status(200).json(tours)
+    } catch (error) {
+        res.status(404).json({
+            message: "something is wrong",
+            error: error.message
+        })
+    }
+}
+export const getTourByTag = async(req, res)=>{
+    const {tag} = req.params
+    try {
+        const tours =await TourModal.find({tags : {$in : tag}})
+        res.status(200).json(tours)
+    } catch (error) {
+        res.status(404).json({
+            message: "something is wrong",
+            error: error.message
+        })
+    }
+}
