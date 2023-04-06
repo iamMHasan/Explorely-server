@@ -22,9 +22,22 @@ export const createTour = async (req, res) => {
 };
 
 export const getTours = async (req, res) => {
+    const {page} = req.query
     try {
-        const tours = await TourModal.find()
-        res.status(200).json(tours)
+        // const tours = await TourModal.find()
+        // res.status(200).json(tours)
+
+        const limit = 2;
+        const startIndex = (Number(page) - 1) * limit
+        const total = await TourModal.countDocuments({})
+        const tours = await TourModal.find().limit(limit).skip(startIndex)
+
+        res.status(200).json({
+            data : tours,
+            currentPage : Number(page),
+            totalTours : total,
+            numOfPages : Math.ceil(total / limit)
+        })
     } catch (error) {
         res.status(404).json({
             message: "something is wrong",
@@ -115,6 +128,18 @@ export const getTourByTag = async(req, res)=>{
     const {tag} = req.params
     try {
         const tours =await TourModal.find({tags : {$in : tag}})
+        res.status(200).json(tours)
+    } catch (error) {
+        res.status(404).json({
+            message: "something is wrong",
+            error: error.message
+        })
+    }
+}
+export const getReletedTours = async(req, res)=>{
+    const tags = req.body
+    try {
+        const tours =await TourModal.find({tags : {$in : tags}})
         res.status(200).json(tours)
     } catch (error) {
         res.status(404).json({
