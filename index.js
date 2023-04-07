@@ -21,6 +21,10 @@ app.use("/tours", tourRouter)
 mongoose.connect(process.env.DATABASE)
 .then(()=> console.log("database connected"))
 
+app.get("/", (req, res)=>{
+    res.send("Explorely server is running")
+})
+
 app.listen(port, ()=>{
     console.log(`server is running on ${port}`)
 })
