@@ -22,7 +22,7 @@ export const createTour = async (req, res) => {
 };
 
 export const getTours = async (req, res) => {
-    const {page} = req.query
+    const { page } = req.query
     try {
         // const tours = await TourModal.find()
         // res.status(200).json(tours)
@@ -33,10 +33,10 @@ export const getTours = async (req, res) => {
         const tours = await TourModal.find().limit(limit).skip(startIndex)
 
         res.status(200).json({
-            data : tours,
-            currentPage : Number(page),
-            totalTours : total,
-            numOfPages : Math.ceil(total / limit)
+            data: tours,
+            currentPage: Number(page),
+            totalTours: total,
+            numOfPages: Math.ceil(total / limit)
         })
     } catch (error) {
         res.status(404).json({
@@ -74,7 +74,7 @@ export const deleteTour = async (req, res) => {
         }
         await TourModal.findByIdAndDelete(id)
         res.status(200).json({
-            message : "Tour deleted"
+            message: "Tour deleted"
         })
     } catch (error) {
         res.status(404).json({
@@ -87,20 +87,20 @@ export const deleteTour = async (req, res) => {
 
 export const updateTour = async (req, res) => {
     const { id } = req.params
-    const {title, description, creator, tags, imageFile} = req.body
+    const { title, description, creator, tags, imageFile } = req.body
     try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(404).json({ message: "user not exsit" })
-    }
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ message: "user not exsit" })
+        }
 
-    const updatedTour = {
-        title,
-        creator,
-        description,
-        tags,
-        imageFile,
-        _id : id
-    }
+        const updatedTour = {
+            title,
+            creator,
+            description,
+            tags,
+            imageFile,
+            _id: id
+        }
         await TourModal.findByIdAndUpdate(id, updatedTour)
         res.status(200).json(updatedTour)
     } catch (error) {
@@ -111,11 +111,11 @@ export const updateTour = async (req, res) => {
     }
 }
 
-export const getTourBySearch = async(req, res)=>{
-    const {searchQuery} = req.query 
+export const getTourBySearch = async (req, res) => {
+    const { searchQuery } = req.query
     try {
         const title = new RegExp(searchQuery, "i")
-        const tours = await TourModal.find({title})
+        const tours = await TourModal.find({ title })
         res.status(200).json(tours)
     } catch (error) {
         res.status(404).json({
@@ -124,10 +124,10 @@ export const getTourBySearch = async(req, res)=>{
         })
     }
 }
-export const getTourByTag = async(req, res)=>{
-    const {tag} = req.params
+export const getTourByTag = async (req, res) => {
+    const { tag } = req.params
     try {
-        const tours =await TourModal.find({tags : {$in : tag}})
+        const tours = await TourModal.find({ tags: { $in: tag } })
         res.status(200).json(tours)
     } catch (error) {
         res.status(404).json({
@@ -136,10 +136,10 @@ export const getTourByTag = async(req, res)=>{
         })
     }
 }
-export const getReletedTours = async(req, res)=>{
+export const getReletedTours = async (req, res) => {
     const tags = req.body
     try {
-        const tours =await TourModal.find({tags : {$in : tags}})
+        const tours = await TourModal.find({ tags: { $in: tags } })
         res.status(200).json(tours)
     } catch (error) {
         res.status(404).json({
@@ -148,3 +148,34 @@ export const getReletedTours = async(req, res)=>{
         })
     }
 }
+
+export const likeTour = async (req, res) => {
+    const { id } = req.params;
+    try {
+      if (!req.userId) {
+        return res.json({ message: "User is not authenticated" });
+      }
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ message: `No tour exist with id: ${id}` });
+      }
+  
+      const tour = await TourModal.findById(id);
+  
+      const index = tour.likes.findIndex((id) => id === String(req.userId));
+  
+      if (index === -1) {
+        tour.likes.push(req.userId);
+      } else {
+        tour.likes = tour.likes.filter((id) => id !== String(req.userId));
+      }
+  
+      const updatedTour = await TourModal.findByIdAndUpdate(id, tour, {
+        new: true,
+      });
+  
+      res.status(200).json(updatedTour);
+    } catch (error) {
+      res.status(404).json({ message: error.message });
+    }
+  };
